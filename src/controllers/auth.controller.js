@@ -33,6 +33,6 @@ export const login = async (req, res) => {
   }
 };
 
-export const getProfile = async (req, res) => {
+export const profile = async (req, res) => {
   res.status(200).json({ user: req.user });
 };
