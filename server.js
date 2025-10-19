@@ -3,16 +3,20 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import http from 'http';
 import router from './src/routes/auth.route.js';
+import {io} from './src/config/socket.io.js';
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 const URI = process.env.MONGO_URI;
-const server = http.createServer(app);
+const Server = http.createServer(app);
 
 //routes
 app.use(express.json());
 app.use('/api/auth', router);
+
+//socket.io integration
+io.attach(Server);
 
 //MongoDB connection
 mongoose.connect(URI, {
@@ -24,7 +28,8 @@ mongoose.connect(URI, {
     console.error("MongoDB connection error:", err);
 });
 
+
 //server 
-server.listen(PORT, () => {
+Server.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
 });
