@@ -12,12 +12,10 @@ const PORT = process.env.PORT;
 const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
 
-//routes
+// Middleware
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use('/api/auth', router);
-
-//connection
-app.use(cors({ origin: "http://localhost:5000", credentials: true }));
 
 //socket.io integration
 io.attach(Server);
