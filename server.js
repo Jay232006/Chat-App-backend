@@ -5,6 +5,7 @@ import cors from 'cors';
 import http from 'http';
 import router from './src/routes/auth.route.js';
 import usersRouter from './src/routes/user.route.js';
+import messageRouter from './src/routes/message.route.js';
 import {io} from './src/config/socket.io.js';
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
+app.use('/api/messages', messageRouter);
 
 //socket.io integration
 io.attach(Server);

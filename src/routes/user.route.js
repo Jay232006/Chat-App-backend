@@ -1,6 +1,6 @@
 import express from 'express';
 import { getUsers, updateProfile } from '../controllers/user.controller.js';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { protect } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -8,6 +8,6 @@ const router = express.Router();
 router.get('/', getUsers);
 
 // PUT /api/users/profile - Update user profile
-router.put('/profile', verifyToken, updateProfile);
+router.put('/profile', protect, updateProfile);
 
 export default router;

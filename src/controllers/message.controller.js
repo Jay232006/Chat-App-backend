@@ -6,12 +6,12 @@ export const sendMessage = async (req, res) => {
   if (!content || !chatId) return res.status(400).json({ message: "Invalid data" });
 
   let message = await Message.create({
-    senderName: req.user.id,
+    sender: req.user.id,
     content,
     chat: chatId,
   });
 
-  message = await message.populate("senderName", "name email");
+  message = await message.populate("sender", "name email");
   message = await message.populate("chat");
   await Chat.findByIdAndUpdate(chatId, { latestMessage: message });
 

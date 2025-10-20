@@ -22,10 +22,15 @@ io.on("connection", (socket) => {
     const chat = newMsg.chat;
     if (!chat.users) return;
 
+    // Ensure message is saved to database (already handled by API)
+    // Now broadcast to all users in the chat
     chat.users.forEach((user) => {
       if (user._id === newMsg.sender._id) return;
       socket.in(user._id).emit("message received", newMsg);
     });
+    
+    // Also broadcast to the chat room for any users viewing this chat
+    socket.to(newMsg.chat._id).emit("message received", newMsg);
   });
 
   socket.on("disconnect", () => {
