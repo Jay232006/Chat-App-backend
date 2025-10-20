@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import http from 'http';
 import router from './src/routes/auth.route.js';
 import {io} from './src/config/socket.io.js';
@@ -15,6 +16,9 @@ const Server = http.createServer(app);
 app.use(express.json());
 app.use('/api/auth', router);
 
+//connection
+app.use(cors({ origin: "http://localhost:5000", credentials: true }));
+
 //socket.io integration
 io.attach(Server);
 
@@ -27,7 +31,6 @@ mongoose.connect(URI, {
 }).catch((err) => {
     console.error("MongoDB connection error:", err);
 });
-
 
 //server 
 Server.listen(PORT, () => {
