@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import http from 'http';
 import router from './src/routes/auth.route.js';
+import usersRouter from './src/routes/user.route.js';
 import {io} from './src/config/socket.io.js';
 
 dotenv.config();
@@ -16,6 +17,7 @@ const Server = http.createServer(app);
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use('/api/auth', router);
+app.use('/api/users', usersRouter);
 
 //socket.io integration
 io.attach(Server);
