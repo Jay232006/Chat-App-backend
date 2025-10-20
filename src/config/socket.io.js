@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 
 export const io = new Server({
   pingTimeout: 60000,
-  cors: { origin: "http://localhost:5000" } 
+  cors: { origin: "http://localhost:5173" } 
 });
 
 io.on("connection", (socket) => {
@@ -28,5 +28,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.off("setup", () => console.log("User disconnected"));
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
+  });
 });
