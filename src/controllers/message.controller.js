@@ -12,8 +12,11 @@ export const sendMessage = async (req, res) => {
   });
 
   message = await message.populate("sender", "name email");
-  message = await message.populate("chat");
-  await Chat.findByIdAndUpdate(chatId, { latestMessage: message });
+  message = await message.populate({
+    path: "chat",
+    populate: { path: "users", select: "name email" }
+  });
+  await Chat.findByIdAndUpdate(chatId, { latestMessage: message, $push: { messages: message._id } });
 
   res.json(message);
 };
