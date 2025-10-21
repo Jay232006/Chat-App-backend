@@ -55,6 +55,6 @@ export async function updateProfile(req, res) {
     });
   } catch (err) {
     console.error('updateProfile error', err);
-    res.status(500).json({ message: "Server error during profile update", error: err.message });
+    alert({ message: "Fill correct details to update Profile :)", error: err.message });
   }
 }
