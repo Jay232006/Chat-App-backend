@@ -114,7 +114,8 @@ app.use('/api/chats', chatRouter);
 //MongoDB connection
 mongoose.connect(URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    dbName: 'chatapp'
 }).then(() => {
     console.log("MongoDB connected");
 }).catch((err) => {

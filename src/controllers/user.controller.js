@@ -11,6 +11,19 @@ export async function getUsers(req, res) {
   }
 }
 
+export async function getMe(req, res) {
+  try {
+    const me = await User.findById(req.user._id).select('-password');
+    if (!me) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ user: me });
+  } catch (err) {
+    console.error('getMe error', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
 export async function updateProfile(req, res) {
   try {
     const { username, email, phone, location, bio } = req.body;
@@ -55,6 +68,6 @@ export async function updateProfile(req, res) {
     });
   } catch (err) {
     console.error('updateProfile error', err);
-    alert({ message: "Fill correct details to update Profile :)", error: err.message });
+    res.status(500).json({ message: "Fill correct details to update Profile :)", error: err.message });
   }
 }

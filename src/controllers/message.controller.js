@@ -6,32 +6,37 @@ export const sendMessage = async (req, res) => {
     const { content, chatId } = req.body;
     if (!content || !chatId) return res.status(400).json({ message: "Invalid data" });
 
-    // Find the chat to get participants
     const chat = await Chat.findById(chatId);
     if (!chat) {
       return res.status(404).json({ message: 'Chat not found' });
     }
 
-    // Find the receiver (the other participant in the chat)
-    const receiverId = chat.users.find(userId => userId.toString() !== req.user.id.toString());
+    if (!Array.isArray(chat.users) || chat.users.length < 2) {
+      return res.status(400).json({ message: 'Chat must have at least two users' });
+    }
+
+    // Use req.user._id for consistency with Mongoose document id
+    const meId = req.user._id?.toString();
+    const receiverId = chat.users.map(u => u.toString()).find(uid => uid !== meId);
     if (!receiverId) {
       return res.status(400).json({ message: 'Receiver not found in chat' });
     }
 
     let message = await Message.create({
-      sender: req.user.id,
+      sender: req.user._id,
       receiver: receiverId,
       content,
       chat: chatId,
     });
 
-    message = await message.populate("sender", "name email");
-    message = await message.populate("receiver", "name email");
+    message = await message.populate("sender", "username email");
+    message = await message.populate("receiver", "username email");
     message = await message.populate({
       path: "chat",
-      populate: { path: "users", select: "name email" }
+      populate: { path: "users", select: "username email" }
     });
-    await Chat.findByIdAndUpdate(chatId, { latestMessage: message, $push: { messages: message._id } });
+
+    await Chat.findByIdAndUpdate(chatId, { latestMessage: message._id, $push: { messages: message._id } });
 
     res.json(message);
   } catch (error) {
@@ -42,7 +47,7 @@ export const sendMessage = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   const messages = await Message.find({ chat: req.params.chatId })
-    .populate("sender", "name email")
+    .populate("sender", "username email")
     .populate("chat");
   res.json(messages);
 };
