@@ -7,13 +7,28 @@ import router from './src/routes/auth.route.js';
 import usersRouter from './src/routes/user.route.js';
 import messageRouter from './src/routes/message.route.js';
 import chatRouter from './src/routes/chat.route.js';
-import {io} from './src/config/socket.io.js';
+import { Server as IOServer } from 'socket.io';
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
+
+// attach socket.io with CORS allowing frontend origin
+const io = new IOServer(Server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// use io handlers...
+io.on('connection', (socket) => {
+  console.log('socket connected', socket.id);
+  // your socket handlers...
+});
 
 // Middleware
 app.use(express.json());
@@ -22,9 +37,6 @@ app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
 app.use('/api/messages', messageRouter);
 app.use('/api/chats', chatRouter);
-
-//socket.io integration
-io.attach(Server);
 
 //MongoDB connection
 mongoose.connect(URI, {
