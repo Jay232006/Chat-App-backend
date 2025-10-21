@@ -24,10 +24,83 @@ const io = new IOServer(Server, {
   }
 });
 
-// use io handlers...
+// Socket.io middleware for authentication
+import jwt from 'jsonwebtoken';
+import User from './src/models/user.model.js';
+import Chat from './src/models/chat.model.js';
+import Message from './src/models/message.model.js';
+
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      console.log("No token provided in socket connection");
+      return next(new Error("Authentication error"));
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+    
+    if (!user) {
+      console.log("User not found for socket connection");
+      return next(new Error("User not found"));
+    }
+    
+    console.log("Socket authenticated for user:", user.username);
+    socket.user = user;
+    next();
+  } catch (error) {
+    console.error("Socket authentication error:", error.message);
+    return next(new Error("Authentication error"));
+  }
+});
+
+// Socket.io event handlers
 io.on('connection', (socket) => {
-  console.log('socket connected', socket.id);
-  // your socket handlers...
+  console.log('User connected:', socket.user.username);
+  
+  // Create or join a socket room for the user
+  socket.join(socket.user._id.toString());
+  
+  // Handle joining a specific chat room
+  socket.on("join chat", (chatId) => {
+    socket.join(chatId);
+    console.log(`User ${socket.user.username} joined chat: ${chatId}`);
+  });
+  
+  // Handle new messages
+  socket.on("new message", async (message) => {
+    try {
+      const chat = await Chat.findById(message.chat);
+      if (!chat) return;
+      
+      // Send message to all users in the chat except sender
+      chat.users.forEach(userId => {
+        if (userId.toString() !== socket.user._id.toString()) {
+          io.to(userId.toString()).emit("message received", message);
+        }
+      });
+      
+      // Update the chat's latest message
+      await Chat.findByIdAndUpdate(message.chat, { latestMessage: message._id });
+    } catch (error) {
+      console.error("Socket error:", error);
+    }
+  });
+  
+  // Handle typing indicators
+  socket.on("typing", (chatId) => {
+    socket.to(chatId).emit("typing", { user: socket.user._id, chatId });
+  });
+  
+  socket.on("stop typing", (chatId) => {
+    socket.to(chatId).emit("stop typing");
+  });
+  
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.user.username);
+  });
 });
 
 // Middleware
