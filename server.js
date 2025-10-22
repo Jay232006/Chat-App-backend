@@ -18,7 +18,7 @@ const Server = http.createServer(app);
 // attach socket.io with CORS allowing frontend origin
 const io = new IOServer(Server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://socketly-6ouz.onrender.com",
     methods: ["GET", "POST"],
     credentials: true
   }
