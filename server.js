@@ -11,14 +11,15 @@ import { Server as IOServer } from 'socket.io';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
+const Frontend_Url = process.env.FRONTEND_URL;
 
 // attach socket.io with CORS allowing frontend origin
 const io = new IOServer(Server, {
   cors: {
-    origin: "https://socketly-6ouz.onrender.com",
+    origin: Frontend_Url,
     methods: ["GET", "POST"],
     credentials: true
   }
