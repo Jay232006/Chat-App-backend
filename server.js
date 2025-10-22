@@ -16,10 +16,11 @@ const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
 const Frontend_Url = process.env.FRONTEND_URL;
 
-// attach socket.io with CORS allowing frontend origin
+// attach socket.io with CORS allowing frontend origin and custom path to avoid ad blockers
 const io = new IOServer(Server, {
+  path: '/socket/socket.io', // Custom path to match frontend
   cors: {
-    origin: Frontend_Url,
+    origin: [Frontend_Url, 'http://localhost:5173'], // Allow both env URL and local dev
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -106,7 +107,10 @@ io.on('connection', (socket) => {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: "https://socketly-6ouz.onrender.com", credentials: true }));
+app.use(cors({ 
+  origin: [Frontend_Url, 'http://localhost:5173'], 
+  credentials: true 
+}));
 app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
 app.use('/api/messages', messageRouter);
