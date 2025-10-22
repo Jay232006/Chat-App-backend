@@ -20,7 +20,7 @@ const Frontend_Url = process.env.FRONTEND_URL;
 const io = new IOServer(Server, {
   path: '/socket/socket.io', // Custom path to match frontend
   cors: {
-    origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173'], // Allow deployed frontend
+    origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173', 'http://127.0.0.1:5173'], // Allow deployed frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -109,10 +109,11 @@ io.on('connection', (socket) => {
 // Middleware
 app.use(express.json());
 app.use(cors({ 
-  origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173'], 
+  origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173', 'http://127.0.0.1:5173'], 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
 app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
