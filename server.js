@@ -11,7 +11,7 @@ import { Server as IOServer } from 'socket.io';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
 const Frontend_Url = process.env.FRONTEND_URL;

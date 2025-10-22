@@ -1,39 +1,44 @@
-import { Server } from "socket.io";
+import express from "express";
+import http from "http";
+import { Server as IOServer } from "socket.io";
 
-export const io = new Server({
+const app = express();
+const server = http.createServer(app);
+
+const io = new IOServer(server, {
   pingTimeout: 60000,
-  cors: { origin: "https://socketly-6ouz.onrender.com" } 
+  cors: { origin: process.env.FRONTEND_URL, methods: ["GET", "POST"], credentials: true }
 });
 
 io.on("connection", (socket) => {
   console.log("User connected", socket.id);
 
-  // Join personal room 
   socket.on("setup", (userData) => {
     socket.join(userData._id);
     socket.emit("connected");
   });
 
-  // Join specific chat room
   socket.on("join chat", (room) => socket.join(room));
 
-  // New message
   socket.on("new message", (newMsg) => {
     const chat = newMsg.chat;
     if (!chat.users) return;
 
-    // Ensure message is saved to database (already handled by API)
-    // Now broadcast to all users in the chat
     chat.users.forEach((user) => {
       if (user._id === newMsg.sender._id) return;
       socket.in(user._id).emit("message received", newMsg);
     });
-    
-    // Also broadcast to the chat room for any users viewing this chat
+
     socket.to(newMsg.chat._id).emit("message received", newMsg);
   });
 
   socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);
   });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
