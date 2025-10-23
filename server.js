@@ -16,18 +16,36 @@ const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
 const Frontend_Url = process.env.FRONTEND_URL;
 
-// attach socket.io with CORS allowing frontend origin and generic path to bypass ad blockers
+// attach socket.io with CORS allowing frontend origin and neutral path to bypass ad blockers
 const io = new IOServer(Server, {
-  path: '/websocket-connection', // Generic path to bypass ad blockers
+  path: '/realtime', // Neutral path to bypass ad blockers and filters
   cors: {
-    origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173', 'http://127.0.0.1:5173'], // Allow deployed frontend
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        'https://socketly-6ouz.onrender.com',
+        Frontend_Url,
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+      ].filter(Boolean);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range']
   },
-  transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
+  transports: ['polling', 'websocket'], // Prioritize polling for better compatibility
   pingTimeout: 60000,
-  upgradeTimeout: 30000
+  upgradeTimeout: 30000,
+  allowEIO3: true // Support older Socket.IO clients
 });
 
 // Socket.io middleware for authentication
@@ -111,13 +129,36 @@ io.on('connection', (socket) => {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ 
-  origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173', 'http://127.0.0.1:5173'], 
+
+// Enhanced CORS configuration for better cross-origin support
+const allowedOrigins = [
+  'https://socketly-6ouz.onrender.com', 
+  Frontend_Url, 
+  'http://localhost:5173', 
+  'http://127.0.0.1:5173',
+  'https://localhost:5173', // HTTPS local development
+  'https://127.0.0.1:5173'
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200,
+  preflightContinue: false
+};
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
+
 app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
 app.use('/api/messages', messageRouter);
