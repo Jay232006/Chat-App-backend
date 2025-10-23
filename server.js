@@ -16,15 +16,18 @@ const URI = process.env.MONGO_URI;
 const Server = http.createServer(app);
 const Frontend_Url = process.env.FRONTEND_URL;
 
-// attach socket.io with CORS allowing frontend origin and custom path to avoid ad blockers
+// attach socket.io with CORS allowing frontend origin and generic path to bypass ad blockers
 const io = new IOServer(Server, {
-  path: '/socket/socket.io', // Custom path to match frontend
+  path: '/websocket-connection', // Generic path to bypass ad blockers
   cors: {
     origin: ['https://socketly-6ouz.onrender.com', Frontend_Url, 'http://localhost:5173', 'http://127.0.0.1:5173'], // Allow deployed frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
-  }
+  },
+  transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
+  pingTimeout: 60000,
+  upgradeTimeout: 30000
 });
 
 // Socket.io middleware for authentication
