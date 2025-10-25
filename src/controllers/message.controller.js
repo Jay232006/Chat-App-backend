@@ -35,7 +35,6 @@ export const sendMessage = async (req, res) => {
       path: "chat",
       populate: { path: "users", select: "username email" }
     });
-
     await Chat.findByIdAndUpdate(chatId, { latestMessage: message._id, $push: { messages: message._id } });
 
     res.json(message);
