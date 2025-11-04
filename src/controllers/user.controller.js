@@ -44,7 +44,6 @@ export async function updateProfile(req, res) {
         return res.status(400).json({ message: "Username is already taken" });
       }
     }
-
     // Update user profile
     const updatedUser = await User.findByIdAndUpdate(
       userId,
