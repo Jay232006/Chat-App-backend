@@ -158,12 +158,10 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
-
 app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
 app.use('/api/messages', messageRouter);
 app.use('/api/chats', chatRouter);
-
 //MongoDB connection
 mongoose.connect(URI, {
     useNewUrlParser: true,
