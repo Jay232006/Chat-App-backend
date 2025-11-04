@@ -9,7 +9,6 @@ export const protect = async (req, res, next) => {
       console.log("Auth failed: Missing or malformed Authorization header");
       return res.status(401).json({ message: "Authorization header missing or malformed" });
     }
-
     const token = authHeader.split(" ")[1];
     
     if (!token) {
