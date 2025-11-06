@@ -29,7 +29,6 @@ export async function updateProfile(req, res) {
     const { username, email, phone, location, bio } = req.body;
     const userId = req.user._id;
 
-    // Check if email is already taken by another user
     if (email && email !== req.user.email) {
       const existingUser = await User.findOne({ email, _id: { $ne: userId } });
       if (existingUser) {
@@ -37,7 +36,6 @@ export async function updateProfile(req, res) {
       }
     }
 
-    // Check if username is already taken by another user
     if (username && username !== req.user.username) {
       const existingUser = await User.findOne({ username, _id: { $ne: userId } });
       if (existingUser) {
