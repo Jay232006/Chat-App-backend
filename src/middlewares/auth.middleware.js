@@ -4,7 +4,6 @@ import User from "../models/user.model.js";
 export const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       console.log("Auth failed: Missing or malformed Authorization header");
       return res.status(401).json({ message: "Authorization header missing or malformed" });
