@@ -162,7 +162,7 @@ app.use('/api/auth', router);
 app.use('/api/users', usersRouter);
 app.use('/api/messages', messageRouter);
 app.use('/api/chats', chatRouter);
-//MongoDB connection
+//MongoDB 
 mongoose.connect(URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -172,7 +172,8 @@ mongoose.connect(URI, {
 }).catch((err) => {
     console.error("MongoDB connection error:", err);
 });
-//server 
+
+//Server
 Server.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
 });
