@@ -5,12 +5,10 @@ export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Basic validation
     if (!username || !email || !password) {
       return res.status(400).json({ message: "Please provide all required fields." });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       if (existingUser.username === username) {
@@ -19,7 +17,6 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "A user with this email already exists." });
     }
 
-    // Create and save the new user
     const newUser = new User({ username, email, password });
     await newUser.save();
     res.status(201).json({
