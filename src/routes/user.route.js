@@ -6,10 +6,8 @@ const router = express.Router();
 
 router.get('/', getUsers);
 
-// GET /api/users/me - Get current authenticated user
 router.get('/me', protect, getMe);
 
-// PUT /api/users/profile - Update user profile
 router.put('/profile', protect, updateProfile);
 
 export default router;
