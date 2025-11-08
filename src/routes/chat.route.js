@@ -5,13 +5,10 @@ import Chat from '../models/chat.model.js';
 
 const router = express.Router();
 
-// Get or create a one-to-one chat between current user and provided userId
 router.post('/', protect, oldChats);
 
-// List all chats for current user
-router.get('/', protect, fetchChats);
+router.get('/', protect, fetchChats());
 
-// Get a specific chat by ID
 router.get('/:chatId', protect, async (req, res) => {
   try {
     const chat = await Chat.findById(req.params.chatId)
@@ -28,7 +25,6 @@ router.get('/:chatId', protect, async (req, res) => {
       return res.status(404).json({ message: "Chat not found" });
     }
     
-    // Check if user is part of this chat
     if (!chat.users.some(user => user._id.toString() === req.user._id.toString())) {
       return res.status(403).json({ message: "Not authorized to access this chat" });
     }
