@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/', protect, oldChats);
 
-router.get('/', protect, fetchChats());
+router.get('/', protect, fetchChats);
 
 router.get('/:chatId', protect, async (req, res) => {
   try {
