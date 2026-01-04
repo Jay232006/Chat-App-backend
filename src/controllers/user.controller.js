@@ -10,6 +10,7 @@ export async function getUsers(req, res) {
   }
 }
 
+//password problem raised 
 export async function getMe(req, res) {
   try {
     const me = await User.findById(req.user._id).select('-password');
